@@ -1,0 +1,421 @@
+IP
+Practical No. 1
+Aim: Perform Point processing in the spatial domain
+
+a. Negation of an image
+skI = imread('E:\ip images\ball.jpeg'); 
+subplot(1, 2, 1),
+imshow(skI);
+title("Original image");
+neg =255 - skI; 
+imshow(neg);
+title("Negated Image")
+
+b. Thresholding of an image 
+img = imread('E:\ip images\ball.jpeg'); 
+thres = graythresh(img);
+bw = imbinarize(img , thres);
+imshowpair(img, bw , 'montage')
+
+c. Contrast Stretching of an image
+img = imread("E:\ip images\ball.jpeg"); 
+img1 = imadjust(img, stretchlim(img) , [0 , 1]);
+imshowpair(img, img1 , 'montage')
+
+
+
+Practical No. 2
+Aim : Perform the experiments for histogram equalization
+I=imread("E:\ip images\ball.jpeg");
+imhist(I) 
+ Red = I(:,:,1);
+ Green = I(:,:,2);
+ Blue = I(:,:,3);
+ 
+figure(2),
+subplot(1,3,1)
+ imhist(Red);
+ subplot(1,3,2)
+ imhist(Green);
+ subplot(1,3,3)
+ imhist(Blue);
+ Comb_I=cat(3, Red, Green, Blue);
+ [J] = hist_eq(Comb_I);
+function [k1]=hist_eq(i)
+for j=1:3
+k=i(:,:,j);
+k1(:,:,j)= histeq(k);
+figure(3), subplot(1,3,j)
+imhist(k1)
+end
+end
+
+
+
+Practical No. 3
+Aim: Perform Zooming by interpolation and replication
+clear all
+clc
+x=imread('E:\ip images\ball.jpeg');
+s=size(x);
+ss=s(1)+s(2);
+y=zeros(ss);
+i=1;
+j=1;
+for n=1:2:ss
+ for m=1:2:ss
+ y (m, n)=x (i, j);
+ i=i+1;
+ end
+ i=1;
+ j=j+1;
+end
+h1=[1 1;1 1];
+h2=[1/4 1/2 1/4; 1/2 1 1/2; 1/4 1/2 1/4];
+A1=conv2(y,h1);
+A2=conv2(y,h2);
+figure(1), imshow(x)
+figure(2), imshow(uint8 (A1))
+figure(3), imshow(uint8 (A2))
+
+
+
+Practical No- 4
+Aim – Implement Filtering in spatial domain
+a. Low pass filtering
+clc
+clear all
+close all
+a=imread('E:\ip images\ball.jpeg');
+b=size(a);
+if size(b,2)==3
+ a = rgb2gray(a);
+end
+a = imnoise(a,'salt & pepper');
+n=input("Enter the size of mask");
+n1=ceil(n/2);
+a=double(a);
+lpf=(1/n^2)*ones(n);
+hpf=-lpf;
+hpf(n1,n1)=(n^2-1)/n^2;
+c=0;
+h=0;
+for i=n1:b(1)-n1
+ for j=n1:b(2)-n1
+ p=1;
+ for k=1:n
+ for l=1:n
+ c(p)=a(i-n1+k,j-n1+l);
+ p=p+1;
+ end
+ end
+ d(i,j)=median(c);
+ c=0;
+ end
+end
+e=uint8(d);
+figure;imshow(e);title('low pass image');
+
+b. High pass filtering
+for i=n1:b(1)-n1
+ for j=n1:b(2)-n1
+ for k=1:n
+ for l=1:n
+ h=h+a(i-n1+k,j-n1+l)*hpf(k,l);
+ end
+ end
+ g(i,j)=h;
+ h=0;
+ end
+end
+f=uint8(g);
+figure;imshow(f);title('high pass image');
+figure;imshow(uint8(a));title('Original image');
+
+c. Median filtering
+% Read the noisy image
+I_noisy = imread("E:\ip images\woman.jpeg");
+
+% Convert the image to grayscale
+I_noisy_gray = rgb2gray(I_noisy);
+
+% Define the size of the median filter window (adjust this as needed)
+window_size = [3, 3];
+
+% Apply median filtering
+I_filtered = medfilt2(I_noisy_gray, window_size);
+
+% Display the original and filtered images
+subplot(1, 2, 1);
+imshow(I_noisy_gray);
+title('Grayscale Noisy Image');
+
+subplot(1, 2, 2);
+imshow(I_filtered);
+title('Filtered Image');
+
+% Optionally, save the filtered image
+imwrite(I_filtered, 'filtered_image.png');
+
+
+
+Practical no-5
+Aim- Implement Filtering in frequency domain
+a. Low Pass filter
+clc
+clear
+close all
+
+A = imread("E:\ip images\woman.jpeg");
+A = rgb2gray(A); % Convert to grayscale if it's a color image
+[m, n] = size(A);
+
+H = zeros(m, n);
+for i = 101:156
+    for j = 101:156
+        H(i, j) = 1;
+    end
+end
+
+% Make sure H is centered in the image
+H = fftshift(H);
+
+B = fft2(double(A)); % Convert A to double before Fourier transform
+
+% Resize H to match the size of B
+H = imresize(H, size(B), 'nearest');
+
+D = B .* H;
+E = abs(ifft2(D));
+
+subplot(2, 2, 1), imshow(A), title('Original Image')
+subplot(2, 2, 2), imshow(H), title('2D View');
+subplot(2, 2, 3), surf(H), title('3D');
+subplot(2, 2, 4), imshow(uint8(E), []), title('Mask After fftshift')
+
+b. High Pass filter
+input_image = imread("E:\ip images\woman.jpeg");
+input_image = double(input_image); % Convert to double
+[M, N] = size(input_image);
+FT_img = fft2(input_image);
+D0 = 10; 
+u = 0:(M-1);
+idx = find(u > M/2);
+u(idx) = u(idx) - M;
+v = 0:(N-1);
+idy = find(v > N/2);
+v(idy) = v(idy) - N;
+[V, U] = meshgrid(v, u);
+% Calculating Euclidean Distance
+D = sqrt(U.^2 + V.^2);
+H = double(D > D0);
+
+% Manually resize H to match the size of FT_img
+H = imresize(H, [size(FT_img, 1), size(FT_img, 2)]);
+
+G = H .* FT_img;
+output_image = real(ifft2(G));
+
+subplot(2, 1, 1), imshow(uint8(input_image)),
+subplot(2, 1, 2), imshow(uint8(output_image), []);
+
+
+
+Practical No-6
+Aim: Implement edge detection using derivative filter mask
+a.Prewitt
+% MATLAB code for prewitt
+% operator edge detection
+k=imread("E:\ip images\woman.jpeg");
+k=rgb2gray(k);
+k1=double(k);
+p_msk=[-1 0 1; -1 0 1; -1 0 1];
+kx=conv2(k1, p_msk, 'same');
+ky=conv2(k1, p_msk', 'same');
+ked=sqrt(kx.^2 + ky.^2);
+% display the images.
+imtool(k,[]);
+% display the edge detection along x-axis.
+imtool(abs(kx), []);
+% display the edge detection along y-axis.
+imtool(abs(ky),[]);
+% display the full edge detection.
+imtool(abs(ked),[]);
+
+b. sobel
+% MATLAB code for Sobel operator
+% edge detection
+k=imread("E:\ip images\woman.jpeg");
+k=rgb2gray(k);
+k1=double(k);
+s_msk=[-1 0 1; -2 0 2; -1 0 1];
+kx=conv2(k1, s_msk, 'same');
+ky=conv2(k1, s_msk', 'same');
+ked=sqrt(kx.^2 + ky.^2);
+%display the images.
+imtool(k,[]);
+%display the edge detection along x-axis.
+imtool(abs(kx), []);
+%display the edge detection along y-axis.
+imtool(abs(ky),[]);
+%display the full edge detection.
+imtool(abs(ked),[]);
+
+c. laplacian
+clc
+clear all
+close all
+warning off
+x=imread("E:\ip images\woman.jpeg");
+figure;
+imshow(x);
+title('Input Image');
+figure;
+h=fspecial('laplacian');
+filtered_image=imfilter(x,h);
+imshow(filtered_image);
+title('Output of Laplacian Filter');
+
+
+
+Practical No.7
+Aim: Implement boundary extraction algorithm.
+1) inner boundary
+% Read the input image
+img=imread('https://www.tutorialspoint.com/electrical_machines/images/electrical_machines_logo.jpg');
+% Convert the input image to grayscale
+gray_img = rgb2gray(img);
+% Specify the structuring element to perform erosion of image
+se = strel('disk', 2);
+% Perform erosion of the grayscale image
+eroded_img = imerode(gray_img, se);
+% Extract the inner boundary by subtracting the eroded image from gray image
+inner_boundary = gray_img - eroded_img;
+% Display the original image and the inner boundary
+subplot(1, 2, 1); imshow(img); title('Original Image');
+subplot(1, 2, 2); imshow(inner_boundary); title('Inner Boundary');
+
+2) outer boundary
+% Read the input image
+img = imread('https://www.tutorialspoint.com/electrical_machines/images/electrical_machines_logo.jpg');
+% Convert the RGB image to grayscale
+gray_img = rgb2gray(img);
+% Specify a structuring element to perform dilation of the image
+se = strel('disk', 2);
+% Perform dilation on the image to expand it
+dilated_img = imdilate(gray_img, se);
+% Extract the outer boundary by computing the difference between dilated image and original image
+outer_boundary = dilated_img - gray_img;
+% Display the original image and the outer boundary
+subplot(1, 2, 1); imshow(img); title('Original Image');
+subplot(1, 2, 2); imshow(outer_boundary); title('Outer Boundary');
+
+
+
+
+Practical No.8
+Aim: Implement different morphological operations.
+I = imread("https://thumbs.dreamstime.com/b/sun-flower-transparent-background-additional-png-file-greeting-cards-holiday-wishes-sun-flower-transparent-129371261.jpg");
+subplot(2, 3, 1),
+imshow(I);
+title("Original image");
+% Dilated Image
+se = strel("line", 7, 7);
+dilate = imdilate(I, se);
+subplot(2, 3, 2),
+imshow(dilate);
+title("Dilated image");
+% Eroded image
+erode = imerode(I, se);
+subplot(2, 3, 3),
+imshow(erode);
+title("Eroded image");
+% Opened image
+open = imopen(I, se);
+subplot(2, 3, 4),
+imshow(open);
+title("Opened image");
+% Closed image
+close = imclose(I, se);
+subplot(2, 3, 5),
+imshow(close);
+title("Closed image");
+
+
+
+
+Practical No. 9
+Aim: Implement data compression using Huffman coding
+% Implement data compression using Huffman coding
+data = 'this is an example for huffman encoding';
+symbols = unique(data);
+probabilities = zeros(1, length(symbols));
+for i = 1:length(symbols)
+    probabilities(i) = sum(data == symbols(i)) / length(data);
+end
+
+% Build the Huffman tree
+numSymbols = length(symbols);
+nodes = cell(numSymbols, 1);
+for i = 1:numSymbols
+    nodes{i}.symbol = i;
+    nodes{i}.probability = probabilities(i);
+end
+
+while length(nodes) > 1
+    [~, sortedIndices] = sort(cellfun(@(x) x.probability, nodes));
+    left = nodes{sortedIndices(1)};
+    right = nodes{sortedIndices(2)};
+ 
+    parent.symbol = [];
+    parent.probability = left.probability + right.probability;
+    parent.left = left;
+    parent.right = right;
+ 
+    nodes(sortedIndices(1:2)) = [];
+    nodes{end + 1} = parent;
+end
+
+huffmanTree = nodes{1};
+
+% Generate Huffman codes
+huffmanCodes = cell(1, length(symbols));
+code = '';
+stack = struct('node', huffmanTree, 'code', code);
+stackSize = 1;
+while stackSize > 0
+    currentNode = stack(stackSize).node;
+    currentCode = stack(stackSize).code;
+    stackSize = stackSize - 1;
+
+    if isfield(currentNode, 'left')
+        leftNode = currentNode.left;
+        leftCode = [currentCode, '0'];
+        stackSize = stackSize + 1;
+        stack(stackSize) = struct('node', leftNode, 'code', leftCode);
+
+        rightNode = currentNode.right;
+        rightCode = [currentCode, '1'];
+        stackSize = stackSize + 1;
+        stack(stackSize) = struct('node', rightNode, 'code', rightCode);
+    else
+        huffmanCodes{currentNode.symbol} = currentCode;
+    end
+end
+
+% Display the Huffman codes
+fprintf('Symbol\tProbability\tCode\n');
+for i = 1:length(symbols)
+    fprintf('%c\t%f\t%s\n', symbols(i), probabilities(i), huffmanCodes{i});
+end
+
+% Encode the data using Huffman codes
+encodedData = '';
+for i = 1:length(data)
+    symbol = data(i);
+    symbolIndex = find(symbols == symbol);
+    encodedData = [encodedData, huffmanCodes{symbolIndex}];
+end
+fprintf('Encoded Data: %s\n', encodedData);
+
+
