@@ -56,27 +56,32 @@ Practical No. 3
 Aim: Perform Zooming by interpolation and replication
 clear all
 clc
-x=imread('E:\ip images\ball.jpeg');
-s=size(x);
-ss=s(1)+s(2);
-y=zeros(ss);
-i=1;
-j=1;
-for n=1:2:ss
- for m=1:2:ss
- y (m, n)=x (i, j);
- i=i+1;
- end
- i=1;
- j=j+1;
+x = imread('E:\ip images\ball.jpeg');
+s = size(x);
+ss = s(1) + s(2);
+y = zeros(ss);
+i = 1;
+j = 1;
+for n = 1:2:ss
+    for m = 1:2:ss
+        if i <= s(1) && j <= s(2)
+            y(m, n) = x(i, j);
+        end
+        i = i + 1;
+    end
+    i = 1;
+    j = j + 1;
 end
-h1=[1 1;1 1];
-h2=[1/4 1/2 1/4; 1/2 1 1/2; 1/4 1/2 1/4];
-A1=conv2(y,h1);
-A2=conv2(y,h2);
+
+h1 = [1 1; 1 1];
+h2 = [1/4 1/2 1/4; 1/2 1 1/2; 1/4 1/2 1/4];
+A1 = conv2(y, h1);
+A2 = conv2(y, h2);
+
 figure(1), imshow(x)
-figure(2), imshow(uint8 (A1))
-figure(3), imshow(uint8 (A2))
+figure(2), imshow(uint8(A1))
+figure(3), imshow(uint8(A2))
+
 
 
 
